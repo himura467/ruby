@@ -4939,7 +4939,7 @@ gc_check_after_marks_i(st_data_t k, st_data_t v, st_data_t ptr)
 static void
 gc_marks_check(rb_objspace_t *objspace, st_foreach_callback_func *checker_func, const char *checker_name)
 {
-    size_t saved_malloc_increase = objspace->malloc_params.increase;
+    size_t saved_malloc_increase = objspace->malloc_counters.increase;
 #if RGENGC_ESTIMATE_OLDMALLOC
     size_t saved_oldmalloc_increase = objspace->malloc_counters.oldmalloc_increase;
 #endif
@@ -4962,7 +4962,7 @@ gc_marks_check(rb_objspace_t *objspace, st_foreach_callback_func *checker_func, 
     objspace->rgengc.allrefs_table = 0;
 
     if (already_disabled == Qfalse) rb_objspace_gc_enable(objspace);
-    objspace->malloc_params.increase = saved_malloc_increase;
+    objspace->malloc_counters.increase = saved_malloc_increase;
 #if RGENGC_ESTIMATE_OLDMALLOC
     objspace->malloc_counters.oldmalloc_increase = saved_oldmalloc_increase;
 #endif
