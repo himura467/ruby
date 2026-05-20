@@ -204,7 +204,7 @@ zero_filled(const char *s, int n)
 }
 
 #if !defined SHARABLE_MIDDLE_SUBSTRING
-# define SHARABLE_MIDDLE_SUBSTRING 0
+# define SHARABLE_MIDDLE_SUBSTRING 1
 #endif
 
 static inline bool
@@ -1991,7 +1991,7 @@ str_duplicate_setup_heap(VALUE klass, VALUE str, VALUE dup)
     RUBY_ASSERT(!STR_SHARED_P(root));
     RUBY_ASSERT(RB_OBJ_FROZEN_RAW(root));
 
-    RSTRING(dup)->as.heap.ptr = RSTRING_PTR(str);
+    RSTRING(dup)->as.heap.ptr = RSTRING_START(str);
     FL_SET_RAW(dup, RSTRING_NOEMBED);
     STR_SET_SHARED(dup, root);
     flags |= RSTRING_NOEMBED | STR_SHARED;
@@ -2773,7 +2773,7 @@ str_make_independent_expand(VALUE str, long len, long expand, const int termlen)
     }
 
     ptr = ALLOC_N(char, (size_t)capa + termlen);
-    oldptr = RSTRING_PTR(str);
+    oldptr = RSTRING_START(str);
     if (oldptr) {
         memcpy(ptr, oldptr, len);
     }
@@ -2906,7 +2906,7 @@ str_fill_term(VALUE str, char *s, long len, int termlen)
         TERM_FILL(s + len, termlen);
         return s;
     }
-    return RSTRING_PTR(str);
+    return RSTRING_START(str);
 }
 
 void
@@ -2941,7 +2941,7 @@ rb_str_change_terminator_length(VALUE str, const int oldtermlen, const int terml
 static char *
 str_null_check(VALUE str, int *w)
 {
-    char *s = RSTRING_PTR(str);
+    char *s = RSTRING_START(str);
     long len = RSTRING_LEN(str);
     int minlen = 1;
 
@@ -3022,9 +3022,29 @@ str_to_cstr(VALUE str)
 char *
 rb_str_fill_terminator(VALUE str, const int newminlen)
 {
-    char *s = RSTRING_PTR(str);
+    char *s = RSTRING_START(str);
     long len = RSTRING_LEN(str);
     return str_fill_term(str, s, len, newminlen);
+}
+
+char *
+rbimpl_str_ptr_guarantee_null_term(VALUE str)
+{
+    RUBY_ASSERT(FL_TEST_RAW(str, STR_NOEMBED | STR_SHARED));
+
+    if (!ruby_thread_has_gvl_p()) {
+        /* We are inside the GC and cannot allocate.  Return the raw pointer;
+         * any null-termination guarantee is relaxed in this context (the
+         * pointer is only used for diagnostic display, not C-string APIs). */
+        return RSTRING(str)->as.heap.ptr;
+    }
+
+    int termlen = TERM_LEN(str);
+    long len = RSTRING_LEN(str);
+    char *ptr = RSTRING(str)->as.heap.ptr;
+
+    if (zero_filled(ptr + len, termlen)) return ptr;
+    return str_fill_term(str, ptr, len, termlen);
 }
 
 VALUE
