@@ -971,7 +971,7 @@ io_ungetbyte(VALUE str, rb_io_t *fptr)
     }
     fptr->rbuf.off-=(int)len;
     fptr->rbuf.len+=(int)len;
-    MEMMOVE(fptr->rbuf.ptr+fptr->rbuf.off, RSTRING_PTR(str), char, len);
+    MEMMOVE(fptr->rbuf.ptr+fptr->rbuf.off, RSTRING_RAW_PTR(str), char, len);
 }
 
 static rb_io_t *
@@ -2037,7 +2037,7 @@ io_fwrite(VALUE str, rb_io_t *fptr, int nosync)
         OBJ_FREEZE(str);
 
     tmp = rb_str_tmp_frozen_no_embed_acquire(str);
-    RSTRING_GETMEM(tmp, ptr, len);
+    ptr = RSTRING_RAW_PTR(tmp); len = RSTRING_LEN(tmp);
     n = io_binwrite(ptr, len, fptr, nosync);
     rb_str_tmp_frozen_release(str, tmp);
 
@@ -2228,7 +2228,7 @@ io_fwritev(int argc, const VALUE *argv, rb_io_t *fptr)
         tmp_array[i] = tmp;
 
         /* iov[0] is reserved for buffer of fptr */
-        iov[i+1].iov_base = RSTRING_PTR(tmp);
+        iov[i+1].iov_base = RSTRING_RAW_PTR(tmp);
         iov[i+1].iov_len = RSTRING_LEN(tmp);
     }
 
@@ -3742,7 +3742,7 @@ io_write_nonblock(rb_execution_context_t *ec, VALUE io, VALUE str, VALUE ex)
         rb_sys_fail_on_write(fptr);
 
     rb_fd_set_nonblock(fptr->fd);
-    n = write(fptr->fd, RSTRING_PTR(str), RSTRING_LEN(str));
+    n = write(fptr->fd, RSTRING_RAW_PTR(str), RSTRING_LEN(str));
     RB_GC_GUARD(str);
 
     if (n < 0) {
@@ -5303,7 +5303,7 @@ rb_io_ungetc(VALUE io, VALUE c)
         }
         fptr->cbuf.off -= (int)len;
         fptr->cbuf.len += (int)len;
-        MEMMOVE(fptr->cbuf.ptr+fptr->cbuf.off, RSTRING_PTR(c), char, len);
+        MEMMOVE(fptr->cbuf.ptr+fptr->cbuf.off, RSTRING_RAW_PTR(c), char, len);
     }
     else {
         NEED_NEWLINE_DECORATOR_ON_READ_CHECK(fptr);

@@ -510,16 +510,17 @@ rb_str_format(int argc, const VALUE *argv, VALUE fmt)
                 rb_str_set_len(result, blen);
                 update_coderange(TRUE);
                 enc = rb_enc_check(result, str);
+                const char *str_ptr = RSTRING_RAW_PTR(str);
                 if (flags&(FPREC|FWIDTH)) {
-                    slen = rb_enc_strlen(RSTRING_PTR(str),RSTRING_END(str),enc);
+                    slen = rb_enc_strlen(str_ptr, str_ptr + len, enc);
                     if (slen < 0) {
                         rb_raise(rb_eArgError, "invalid mbstring sequence");
                     }
                     if ((flags&FPREC) && (prec < slen)) {
-                        char *p = rb_enc_nth(RSTRING_PTR(str), RSTRING_END(str),
+                        char *p = rb_enc_nth(str_ptr, str_ptr + len,
                                              prec, enc);
                         slen = prec;
-                        len = p - RSTRING_PTR(str);
+                        len = p - str_ptr;
                     }
                     /* need to adjust multi-byte string pos */
                     if ((flags&FWIDTH) && (width > slen)) {
@@ -529,7 +530,7 @@ rb_str_format(int argc, const VALUE *argv, VALUE fmt)
                             FILL_(' ', width);
                             width = 0;
                         }
-                        memcpy(&buf[blen], RSTRING_PTR(str), len);
+                        memcpy(&buf[blen], str_ptr, len);
                         RB_GC_GUARD(str);
                         blen += len;
                         if (flags&FMINUS) {
@@ -539,7 +540,7 @@ rb_str_format(int argc, const VALUE *argv, VALUE fmt)
                         break;
                     }
                 }
-                PUSH(RSTRING_PTR(str), len);
+                PUSH(str_ptr, len);
                 RB_GC_GUARD(str);
                 rb_enc_associate(result, enc);
             }

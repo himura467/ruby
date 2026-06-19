@@ -3020,7 +3020,7 @@ ary_join_fast(VALUE ary, VALUE sep)
         /* The separator must share the element encoding, or be 7-bit (encidx is
            ASCII-compatible, so a 7-bit separator concatenates without negotiation). */
         if (ENCODING_GET(sep) != encidx && sep_cr != ENC_CODERANGE_7BIT) return Qundef;
-        sep_ptr = RSTRING_PTR(sep);
+        sep_ptr = RSTRING_RAW_PTR(sep);
         sep_len = RSTRING_LEN(sep);
         if (n > 1) cr = ENC_CODERANGE_AND(cr, sep_cr);
     }
@@ -3045,7 +3045,7 @@ ary_join_fast(VALUE ary, VALUE sep)
             memcpy(p, sep_ptr, sep_len);
             p += sep_len;
         }
-        memcpy(p, RSTRING_PTR(s), slen);
+        memcpy(p, RSTRING_RAW_PTR(s), slen);
         p += slen;
     }
 
