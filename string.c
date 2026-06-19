@@ -387,7 +387,7 @@ BARE_STRING_P(VALUE str)
 static inline st_index_t
 str_do_hash(VALUE str)
 {
-    st_index_t h = rb_memhash((const void *)RSTRING_PTR(str), RSTRING_LEN(str));
+    st_index_t h = rb_memhash((const void *)RSTRING_RAW_PTR(str), RSTRING_LEN(str));
     int e = RSTRING_LEN(str) ? ENCODING_GET(str) : 0;
     if (e && !is_ascii_string(str)) {
         h = rb_hash_end(rb_hash_uint32(h, (uint32_t)e));
@@ -482,8 +482,8 @@ fstring_concurrent_set_cmp(VALUE a, VALUE b)
     RUBY_ASSERT(RB_TYPE_P(a, T_STRING));
     RUBY_ASSERT(RB_TYPE_P(b, T_STRING));
 
-    RSTRING_GETMEM(a, aptr, alen);
-    RSTRING_GETMEM(b, bptr, blen);
+    aptr = RSTRING_RAW_PTR(a); alen = RSTRING_LEN(a);
+    bptr = RSTRING_RAW_PTR(b); blen = RSTRING_LEN(b);
     return (alen == blen &&
             ENCODING_GET(a) == ENCODING_GET(b) &&
             memcmp(aptr, bptr, alen) == 0);
@@ -3018,9 +3018,8 @@ rb_str_null_check(VALUE str)
 {
     RUBY_ASSERT(RB_TYPE_P(str, T_STRING));
 
-    const char *s;
-    long len;
-    RSTRING_GETMEM(str, s, len);
+    const char *s = RSTRING_RAW_PTR(str);
+    long len = RSTRING_LEN(str);
 
     if (RB_LIKELY(rb_str_enc_fastpath(str))) {
         if (!s || memchr(s, 0, len)) {
@@ -4341,10 +4340,8 @@ rb_str_hash(VALUE str)
 int
 rb_str_hash_cmp(VALUE str1, VALUE str2)
 {
-    long len1, len2;
-    const char *ptr1, *ptr2;
-    RSTRING_GETMEM(str1, ptr1, len1);
-    RSTRING_GETMEM(str2, ptr2, len2);
+    long len1 = RSTRING_LEN(str1), len2 = RSTRING_LEN(str2);
+    const char *ptr1 = RSTRING_RAW_PTR(str1), *ptr2 = RSTRING_RAW_PTR(str2);
     return (len1 != len2 ||
             !rb_str_comparable(str1, str2) ||
             memcmp(ptr1, ptr2, len1) != 0);
@@ -4400,8 +4397,8 @@ rb_str_cmp(VALUE str1, VALUE str2)
     int retval;
 
     if (str1 == str2) return 0;
-    RSTRING_GETMEM(str1, ptr1, len1);
-    RSTRING_GETMEM(str2, ptr2, len2);
+    ptr1 = RSTRING_RAW_PTR(str1); len1 = RSTRING_LEN(str1);
+    ptr2 = RSTRING_RAW_PTR(str2); len2 = RSTRING_LEN(str2);
     if (ptr1 == ptr2 || (retval = memcmp(ptr1, ptr2, lesser(len1, len2))) == 0) {
         if (len1 == len2) {
             if (!rb_str_comparable(str1, str2)) {
@@ -4970,7 +4967,7 @@ rb_str_rindex(VALUE str, VALUE sub, long pos)
     sbeg = RSTRING_PTR(str);
 
     if (pos == 0) {
-        if (memcmp(sbeg, RSTRING_PTR(sub), RSTRING_LEN(sub)) == 0)
+        if (memcmp(sbeg, RSTRING_RAW_PTR(sub), RSTRING_LEN(sub)) == 0)
             return 0;
         else
             return -1;
@@ -5052,7 +5049,7 @@ rb_str_byterindex(VALUE str, VALUE sub, long pos)
     sbeg = RSTRING_PTR(str);
 
     if (pos == 0) {
-        if (memcmp(sbeg, RSTRING_PTR(sub), RSTRING_LEN(sub)) == 0)
+        if (memcmp(sbeg, RSTRING_RAW_PTR(sub), RSTRING_LEN(sub)) == 0)
             return 0;
         else
             return -1;
@@ -12019,7 +12016,7 @@ rb_str_start_with(int argc, VALUE *argv, VALUE str)
             s = p + tlen;
             if (!at_char_right_boundary(p, s, e, enc))
                 continue;
-            if (memcmp(p, RSTRING_PTR(tmp), tlen) == 0)
+            if (memcmp(p, RSTRING_RAW_PTR(tmp), tlen) == 0)
                 return Qtrue;
         }
     }
@@ -12054,7 +12051,7 @@ rb_str_end_with(int argc, VALUE *argv, VALUE str)
         s = e - tlen;
         if (!at_char_boundary(p, s, e, enc))
             continue;
-        if (memcmp(s, RSTRING_PTR(tmp), tlen) == 0)
+        if (memcmp(s, RSTRING_RAW_PTR(tmp), tlen) == 0)
             return Qtrue;
     }
     return Qfalse;

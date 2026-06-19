@@ -505,7 +505,7 @@ w_symbol(VALUE sym, struct dump_arg *arg)
         }
         encname = w_encivar(sym, arg);
         w_byte(TYPE_SYMBOL, arg);
-        w_bytes(RSTRING_PTR(sym), RSTRING_LEN(sym), arg);
+        w_bytes(RSTRING_RAW_PTR(sym), RSTRING_LEN(sym), arg);
         st_add_direct(arg->symbols, orig_sym, arg->symbols->num_entries);
         w_encname(encname, arg);
     }
@@ -910,7 +910,7 @@ w_object(VALUE obj, struct dump_arg *arg, int limit)
             }
             if (hasiv) w_byte(TYPE_IVAR, arg);
             w_class(TYPE_USERDEF, obj, arg, FALSE);
-            w_bytes(RSTRING_PTR(v), RSTRING_LEN(v), arg);
+            w_bytes(RSTRING_RAW_PTR(v), RSTRING_LEN(v), arg);
             if (hasiv) {
                 st_data_t userdefs = (st_data_t)obj;
                 if (!arg->userdefs) {
@@ -1014,7 +1014,7 @@ w_object(VALUE obj, struct dump_arg *arg, int limit)
           case T_STRING:
             w_uclass(obj, rb_cString, arg);
             w_byte(TYPE_STRING, arg);
-            w_bytes(RSTRING_PTR(obj), RSTRING_LEN(obj), arg);
+            w_bytes(RSTRING_RAW_PTR(obj), RSTRING_LEN(obj), arg);
             break;
 
           case T_REGEXP:
