@@ -1762,6 +1762,18 @@ rb_str_tmp_new(long len)
 static rb_nativethread_lock_t ephemeral_term_lock;
 static st_table *ephemeral_term_table;
 static rb_atomic_t ephemeral_term_count;
+/* DIAGNOSTIC: cumulative count of no-GVL calls to rbimpl_str_ensure_terminator.
+ * Printed at process exit when RUBY_REPORT_NOGVL_TERMINATOR=1. */
+static rb_atomic_t ephemeral_term_nogvl_total;
+
+static void
+nogvl_term_atexit(void)
+{
+    if (!getenv("RUBY_REPORT_NOGVL_TERMINATOR")) return;
+    rb_atomic_t count = RUBY_ATOMIC_LOAD(ephemeral_term_nogvl_total);
+    if (count == 0) return;
+    fprintf(stderr, "[NOGVL_TERM] pid=%d calls=%u\n", (int)getpid(), (unsigned)count);
+}
 
 static void
 ephemeral_term_cleanup(VALUE str)
@@ -3029,6 +3041,7 @@ rbimpl_str_ensure_terminator(VALUE str)
         /* Allocate a null-terminated copy outside the GC heap and
          * cache it in ephemeral_term_table, keyed by this string's VALUE.
          * The copy is freed when the string is freed (rb_str_free). */
+        RUBY_ATOMIC_INC(ephemeral_term_nogvl_total);
         char *result;
         rb_nativethread_lock_lock(&ephemeral_term_lock);
         if (st_lookup(ephemeral_term_table, (st_data_t)str, (st_data_t *)&result)) {
@@ -12965,6 +12978,7 @@ Init_String(void)
 {
     rb_nativethread_lock_initialize(&ephemeral_term_lock);
     ephemeral_term_table = st_init_numtable();
+    atexit(nogvl_term_atexit);
 
     rb_cString  = rb_define_class("String", rb_cObject);
 
