@@ -1,0 +1,84 @@
+current: ruby 4.1.0dev (2026-06-21T06:50:18Z rstring-raw-ptr-ex.. c7eace4288) +PRISM [arm64-darwin25]
+master: ruby 4.1.0dev (2026-06-21T03:05:27Z master a2b9d6ff3b) +PRISM [arm64-darwin25]
+
+---------------------  -------------  -----------------  ------------------  -------------  ----------------  -----------------  --------------  --------------  -------------------  --------------------
+bench                   current (ms)  current mark (ms)  current sweep (ms)    master (ms)  master mark (ms)  master sweep (ms)  master 1st itr  current/master  mark current/master  sweep current/master
+activerecord            156.8 ± 2.7%                N/A                 N/A   154.6 ± 3.3%               N/A                N/A           0.934           1.014                  N/A                   N/A
+chunky-png              490.8 ± 0.4%                N/A                 N/A   494.0 ± 0.3%               N/A                N/A           0.992           0.993                  N/A                   N/A
+erubi-rails             697.3 ± 0.8%                N/A                 N/A   703.2 ± 1.0%               N/A                N/A           0.998           0.992                  N/A                   N/A
+hexapdf                1250.1 ± 0.6%                N/A                 N/A  1251.8 ± 1.0%               N/A                N/A           0.998           0.999                  N/A                   N/A
+liquid-c                 31.8 ± 5.7%                N/A                 N/A    31.6 ± 4.2%               N/A                N/A           1.069           1.006                  N/A                   N/A
+liquid-compile           30.0 ± 4.9%                N/A                 N/A    29.7 ± 4.4%               N/A                N/A           0.996           1.010                  N/A                   N/A
+liquid-render            79.6 ± 2.2%                N/A                 N/A    80.2 ± 2.4%               N/A                N/A           1.005           0.992                  N/A                   N/A
+lobsters                479.1 ± 0.4%                N/A                 N/A   480.7 ± 2.1%               N/A                N/A           1.060           0.997                  N/A                   N/A
+mail                     70.8 ± 2.6%                N/A                 N/A    71.8 ± 2.5%               N/A                N/A           0.979           0.986                  N/A                   N/A
+psych-load             1292.7 ± 1.0%                N/A                 N/A  1238.9 ± 0.3%               N/A                N/A           1.010           1.043                  N/A                   N/A
+railsbench              942.2 ± 1.0%                N/A                 N/A   932.9 ± 0.7%               N/A                N/A           1.008           1.010                  N/A                   N/A
+rubocop                 104.1 ± 5.5%                N/A                 N/A   105.5 ± 6.2%               N/A                N/A           0.949           0.987                  N/A                   N/A
+ruby-lsp                 95.1 ± 3.6%                N/A                 N/A    99.4 ± 2.9%               N/A                N/A           0.957           0.956                  N/A                   N/A
+sequel                   31.6 ± 4.8%                N/A                 N/A    31.9 ± 5.1%               N/A                N/A           1.005           0.993                  N/A                   N/A
+shipit                  839.9 ± 1.1%                N/A                 N/A   842.9 ± 1.5%               N/A                N/A           1.005           0.997                  N/A                   N/A
+addressable-equality    353.6 ± 0.8%                N/A                 N/A   360.0 ± 0.5%               N/A                N/A           0.987           0.982                  N/A                   N/A
+addressable-getters      88.1 ± 1.5%                N/A                 N/A    88.2 ± 1.0%               N/A                N/A           1.019           0.999                  N/A                   N/A
+addressable-join        167.4 ± 0.5%                N/A                 N/A   165.3 ± 0.7%               N/A                N/A           1.003           1.013                  N/A                   N/A
+addressable-merge        91.1 ± 1.5%                N/A                 N/A    91.6 ± 0.2%               N/A                N/A           0.990           0.995                  N/A                   N/A
+addressable-new          42.2 ± 0.5%                N/A                 N/A    42.7 ± 1.7%               N/A                N/A           1.004           0.990                  N/A                   N/A
+addressable-normalize   199.0 ± 1.1%                N/A                 N/A   201.5 ± 0.9%               N/A                N/A           0.987           0.988                  N/A                   N/A
+addressable-parse       136.3 ± 0.7%                N/A                 N/A   136.5 ± 0.1%               N/A                N/A           0.981           0.999                  N/A                   N/A
+addressable-setters      78.2 ± 1.7%                N/A                 N/A    78.7 ± 1.8%               N/A                N/A           0.996           0.993                  N/A                   N/A
+addressable-to-s         88.1 ± 0.9%                N/A                 N/A    89.2 ± 0.2%               N/A                N/A           0.997           0.989                  N/A                   N/A
+binarytrees             228.9 ± 0.8%                N/A                 N/A   231.5 ± 1.0%               N/A                N/A           1.006           0.989                  N/A                   N/A
+blurhash                249.7 ± 0.6%                N/A                 N/A   251.3 ± 0.4%               N/A                N/A           1.011           0.994                  N/A                   N/A
+erubi                   124.5 ± 1.0%                N/A                 N/A   122.1 ± 0.2%               N/A                N/A           0.997           1.020                  N/A                   N/A
+etanni                  212.3 ± 0.8%                N/A                 N/A   209.1 ± 0.8%               N/A                N/A           1.040           1.016                  N/A                   N/A
+fannkuchredux           355.0 ± 0.5%                N/A                 N/A   356.5 ± 0.4%               N/A                N/A           1.011           0.996                  N/A                   N/A
+fluentd                 244.8 ± 2.6%                N/A                 N/A   264.5 ± 1.4%               N/A                N/A           0.918           0.926                  N/A                   N/A
+gcbench                1290.8 ± 0.3%         9.1 ± 3.3%         44.4 ± 1.1%  1295.8 ± 0.3%        9.1 ± 3.3%        44.1 ± 1.6%           1.003           0.996                1.000                 1.007
+graphql                  40.3 ± 2.3%                N/A                 N/A    40.3 ± 2.8%               N/A                N/A           1.039           1.000                  N/A                   N/A
+graphql-native          179.0 ± 0.6%                N/A                 N/A   178.2 ± 0.9%               N/A                N/A           1.005           1.004                  N/A                   N/A
+knucleotide              25.7 ± 4.8%                N/A                 N/A    26.1 ± 4.1%               N/A                N/A           0.921           0.988                  N/A                   N/A
+lee                     535.9 ± 0.3%                N/A                 N/A   531.6 ± 0.4%               N/A                N/A           1.026           1.008                  N/A                   N/A
+matmul                  359.0 ± 0.5%                N/A                 N/A   358.5 ± 0.4%               N/A                N/A           1.001           1.001                  N/A                   N/A
+nbody                    64.0 ± 0.1%                N/A                 N/A    64.3 ± 1.1%               N/A                N/A           1.001           0.996                  N/A                   N/A
+nqueens                 163.0 ± 0.5%                N/A                 N/A   162.5 ± 0.1%               N/A                N/A           1.000           1.003                  N/A                   N/A
+optcarrot              3432.6 ± 0.4%                N/A                 N/A  3457.5 ± 0.4%               N/A                N/A           0.993           0.993                  N/A                   N/A
+protoboeuf              104.6 ± 0.3%                N/A                 N/A   103.2 ± 1.0%               N/A                N/A           1.017           1.013                  N/A                   N/A
+protoboeuf-encode       100.2 ± 0.1%                N/A                 N/A    99.5 ± 0.1%               N/A                N/A           1.009           1.007                  N/A                   N/A
+rack                     32.5 ± 4.3%                N/A                 N/A    32.7 ± 4.4%               N/A                N/A           1.003           0.995                  N/A                   N/A
+ruby-json               152.5 ± 0.8%                N/A                 N/A   150.2 ± 0.8%               N/A                N/A           1.004           1.015                  N/A                   N/A
+rubyboy                3119.6 ± 0.1%                N/A                 N/A  3104.3 ± 0.1%               N/A                N/A           1.004           1.005                  N/A                   N/A
+rubykon                 574.2 ± 1.6%                N/A                 N/A   574.8 ± 1.6%               N/A                N/A           1.010           0.999                  N/A                   N/A
+splay                   93.7 ± 33.7%                N/A                 N/A   93.5 ± 33.7%               N/A                N/A           0.986           1.002                  N/A                   N/A
+sudoku                  398.6 ± 0.3%                N/A                 N/A   398.5 ± 0.3%               N/A                N/A           0.999           1.000                  N/A                   N/A
+tinygql                 381.4 ± 0.6%                N/A                 N/A   380.5 ± 0.6%               N/A                N/A           0.999           1.002                  N/A                   N/A
+30k_ifelse              338.2 ± 0.9%                N/A                 N/A   339.6 ± 0.9%               N/A                N/A           1.009           0.996                  N/A                   N/A
+30k_methods             282.9 ± 1.0%                N/A                 N/A   286.6 ± 1.2%               N/A                N/A           1.002           0.987                  N/A                   N/A
+attr_accessor           127.1 ± 0.9%                N/A                 N/A   127.9 ± 0.6%               N/A                N/A           0.994           0.994                  N/A                   N/A
+cfunc_itself             60.6 ± 0.1%                N/A                 N/A    60.6 ± 0.1%               N/A                N/A           0.997           0.999                  N/A                   N/A
+fib                     162.0 ± 0.6%                N/A                 N/A   161.5 ± 0.6%               N/A                N/A           1.006           1.003                  N/A                   N/A
+getivar                  90.3 ± 0.2%                N/A                 N/A    91.0 ± 0.8%               N/A                N/A           0.996           0.992                  N/A                   N/A
+getivar-module          181.5 ± 1.1%                N/A                 N/A   182.4 ± 0.6%               N/A                N/A           0.992           0.995                  N/A                   N/A
+keyword_args            138.6 ± 0.5%                N/A                 N/A   138.9 ± 0.1%               N/A                N/A           0.996           0.998                  N/A                   N/A
+loops-times             711.0 ± 0.2%                N/A                 N/A   711.9 ± 0.2%               N/A                N/A           0.998           0.999                  N/A                   N/A
+object-new               36.5 ± 0.6%                N/A                 N/A    36.5 ± 0.7%               N/A                N/A           0.997           1.002                  N/A                   N/A
+object-new-initialize    71.5 ± 0.2%                N/A                 N/A    71.9 ± 1.1%               N/A                N/A           0.998           0.993                  N/A                   N/A
+object-new-no-escape    141.1 ± 0.6%                N/A                 N/A   140.6 ± 0.1%               N/A                N/A           0.999           1.004                  N/A                   N/A
+respond_to              150.0 ± 0.1%                N/A                 N/A   150.7 ± 0.1%               N/A                N/A           1.004           0.996                  N/A                   N/A
+ruby-xor                 85.9 ± 1.7%                N/A                 N/A    85.4 ± 1.1%               N/A                N/A           1.002           1.007                  N/A                   N/A
+send_bmethod            147.1 ± 0.1%                N/A                 N/A   146.5 ± 0.1%               N/A                N/A           1.004           1.004                  N/A                   N/A
+send_cfunc_block        192.0 ± 0.5%                N/A                 N/A   193.1 ± 0.4%               N/A                N/A           0.993           0.994                  N/A                   N/A
+send_rubyfunc_block      98.5 ± 0.9%                N/A                 N/A    98.5 ± 0.7%               N/A                N/A           1.002           1.001                  N/A                   N/A
+setivar                  60.8 ± 0.0%                N/A                 N/A    60.4 ± 0.6%               N/A                N/A           1.002           1.006                  N/A                   N/A
+setivar_object           70.7 ± 2.7%                N/A                 N/A    70.5 ± 2.0%               N/A                N/A           1.014           1.003                  N/A                   N/A
+setivar_young            70.4 ± 1.1%                N/A                 N/A    71.0 ± 2.1%               N/A                N/A           0.990           0.991                  N/A                   N/A
+str_concat               54.7 ± 1.0%                N/A                 N/A    54.7 ± 1.2%               N/A                N/A           0.995           1.002                  N/A                   N/A
+structaref              133.3 ± 0.8%                N/A                 N/A   132.0 ± 1.1%               N/A                N/A           1.008           1.010                  N/A                   N/A
+structaset              118.9 ± 0.1%                N/A                 N/A   119.5 ± 0.1%               N/A                N/A           0.995           0.995                  N/A                   N/A
+throw                    14.0 ± 1.2%                N/A                 N/A    13.9 ± 1.2%               N/A                N/A           0.993           1.004                  N/A                   N/A
+---------------------  -------------  -----------------  ------------------  -------------  ----------------  -----------------  --------------  --------------  -------------------  --------------------
+
+Legend:
+- master 1st itr: ratio of current/master time for the first benchmarking iteration.
+- current/master: ratio of current/master time. Higher is better for master. Above 1 represents a speedup.
+- mark current/master: ratio of GC marking time. Higher is better for master. Above 1 represents faster marking.
+- sweep current/master: ratio of GC sweeping time. Higher is better for master. Above 1 represents faster sweeping.
