@@ -987,7 +987,7 @@ rb_enc_str_asciionly_p(VALUE str)
 static inline void
 str_mod_check(VALUE s, const char *p, long len)
 {
-    if (RSTRING_PTR(s) != p || RSTRING_LEN(s) != len){
+    if (RSTRING_RAW_PTR(s) != p || RSTRING_LEN(s) != len){
         rb_raise(rb_eRuntimeError, "string modified");
     }
 }
@@ -4630,10 +4630,10 @@ rb_strseq_index(VALUE str, VALUE sub, long offset, int in_byte)
     enc = rb_enc_check(str, sub);
     if (is_broken_string(sub)) return -1;
 
-    str_ptr = RSTRING_PTR(str);
-    str_ptr_end = RSTRING_END(str);
+    str_ptr = RSTRING_RAW_PTR(str);
     str_len = RSTRING_LEN(str);
-    sub_ptr = RSTRING_PTR(sub);
+    str_ptr_end = str_ptr + str_len;
+    sub_ptr = RSTRING_RAW_PTR(sub);
     sub_len = RSTRING_LEN(sub);
 
     if (str_len < sub_len) return -1;
@@ -6476,7 +6476,7 @@ str_gsub(int argc, VALUE *argv, VALUE str, int bang)
     offset = 0;
     blen = RSTRING_LEN(str) + 30; /* len + margin */
     dest = rb_str_buf_new(blen);
-    sp = RSTRING_PTR(str);
+    sp = RSTRING_RAW_PTR(str);
     slen = RSTRING_LEN(str);
     cp = sp;
     str_enc = STR_ENC_GET(str);
@@ -6544,11 +6544,11 @@ str_gsub(int argc, VALUE *argv, VALUE str, int bang)
              * in order to prevent infinite loops.
              */
             if (RSTRING_LEN(str) <= end0) break;
-            len = rb_enc_fast_mbclen(RSTRING_PTR(str)+end0, RSTRING_END(str), str_enc);
-            rb_enc_str_buf_cat(dest, RSTRING_PTR(str)+end0, len, str_enc);
+            len = rb_enc_fast_mbclen(sp+end0, sp+slen, str_enc);
+            rb_enc_str_buf_cat(dest, sp+end0, len, str_enc);
             offset = end0 + len;
         }
-        cp = RSTRING_PTR(str) + offset;
+        cp = sp + offset;
         if (offset > RSTRING_LEN(str)) break;
 
         // In FAST_MAP and STR mode the backref can't escape so we can re-use the MatchData safely.
@@ -9360,7 +9360,7 @@ rb_str_split_m(int argc, VALUE *argv, VALUE str)
         str_mod_check(str, str_start, str_len))
 
     beg = 0;
-    const char *ptr = RSTRING_PTR(str);
+    const char *ptr = RSTRING_RAW_PTR(str);
     const char *const str_start = ptr;
     const long str_len = RSTRING_LEN(str);
     const char *const eptr = str_start + str_len;
@@ -9425,7 +9425,7 @@ rb_str_split_m(int argc, VALUE *argv, VALUE str)
     }
     else if (split_type == SPLIT_TYPE_STRING) {
         const char *substr_start = ptr;
-        const char *sptr = RSTRING_PTR(spat);
+        const char *sptr = RSTRING_RAW_PTR(spat);
         long slen = RSTRING_LEN(spat);
 
         if (result) result = rb_ary_new();
@@ -11247,7 +11247,7 @@ rb_str_justify(int argc, VALUE *argv, VALUE str, char jflag)
     if (argc == 2) {
         StringValue(pad);
         enc = rb_enc_check(str, pad);
-        f = RSTRING_PTR(pad);
+        f = RSTRING_RAW_PTR(pad);
         flen = RSTRING_LEN(pad);
         fclen = str_strlen(pad, enc); /* rb_enc_check */
         singlebyte = single_byte_optimizable(pad);
@@ -11290,7 +11290,7 @@ rb_str_justify(int argc, VALUE *argv, VALUE str, char jflag)
             p += llen2;
         }
     }
-    memcpy(p, RSTRING_PTR(str), size);
+    memcpy(p, RSTRING_RAW_PTR(str), size);
     p += size;
     if (flen <= 1) {
         memset(p, *f, rlen);
@@ -11466,7 +11466,7 @@ rb_str_start_with(int argc, VALUE *argv, VALUE str)
             enc = rb_enc_check(str, tmp);
             if ((tlen = RSTRING_LEN(tmp)) == 0) return Qtrue;
             if ((slen = RSTRING_LEN(str)) < tlen) continue;
-            p = RSTRING_PTR(str);
+            p = RSTRING_RAW_PTR(str);
             e = p + slen;
             s = p + tlen;
             if (!at_char_right_boundary(p, s, e, enc))
@@ -11501,7 +11501,7 @@ rb_str_end_with(int argc, VALUE *argv, VALUE str)
         enc = rb_enc_check(str, tmp);
         if ((tlen = RSTRING_LEN(tmp)) == 0) return Qtrue;
         if ((slen = RSTRING_LEN(str)) < tlen) continue;
-        p = RSTRING_PTR(str);
+        p = RSTRING_RAW_PTR(str);
         e = p + slen;
         s = e - tlen;
         if (!at_char_boundary(p, s, e, enc))
