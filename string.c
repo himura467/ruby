@@ -1755,21 +1755,33 @@ rb_str_tmp_new(long len)
     return str_new(0, 0, len);
 }
 
-/*
- * Global table for null-terminated copies of shared middle substrings created
- * without the GVL.
- */
+static st_table *gvl_term_table;
+static long gvl_term_count;
 static rb_nativethread_lock_t ephemeral_term_lock;
 static st_table *ephemeral_term_table;
 static rb_atomic_t ephemeral_term_count;
+static rb_atomic_t ephemeral_term_nogvl_total;
+
+static void
+gvl_term_cleanup(VALUE str)
+{
+    if (gvl_term_count == 0) return;
+
+    st_data_t key = str;
+    st_data_t buf;
+    bool deleted = st_delete(gvl_term_table, &key, &buf);
+    if (deleted) {
+        gvl_term_count--;
+        ruby_mimfree((void *)buf);
+    }
+}
 
 static void
 ephemeral_term_cleanup(VALUE str)
 {
-    /* Skip the mutex when the table is empty. */
     if (RUBY_ATOMIC_LOAD(ephemeral_term_count) == 0) return;
 
-    st_data_t key = (st_data_t)str;
+    st_data_t key = str;
     st_data_t buf;
     rb_nativethread_lock_lock(&ephemeral_term_lock);
     bool deleted = st_delete(ephemeral_term_table, &key, &buf);
@@ -1779,16 +1791,20 @@ ephemeral_term_cleanup(VALUE str)
 }
 
 static int
-ephemeral_term_free_i(st_data_t str, st_data_t buf, st_data_t arg)
+term_buf_free_i(st_data_t str, st_data_t buf, st_data_t arg)
 {
     ruby_mimfree((void *)buf);
     return ST_CONTINUE;
 }
 
 void
-rb_free_ephemeral_term_table(void)
+rb_free_term_tables(void)
 {
-    st_foreach(ephemeral_term_table, ephemeral_term_free_i, 0);
+    st_foreach(gvl_term_table, term_buf_free_i, 0);
+    gvl_term_count = 0;
+    st_free_table(gvl_term_table);
+    gvl_term_table = NULL;
+    st_foreach(ephemeral_term_table, term_buf_free_i, 0);
     RUBY_ATOMIC_SET(ephemeral_term_count, 0);
     st_free_table(ephemeral_term_table);
     ephemeral_term_table = NULL;
@@ -1797,7 +1813,7 @@ rb_free_ephemeral_term_table(void)
 void
 rb_str_free(VALUE str)
 {
-    /* Clean up any ephemeral null-termination buffer for this string. */
+    gvl_term_cleanup(str);
     ephemeral_term_cleanup(str);
 
     if (STR_EMBED_P(str)) {
@@ -3025,10 +3041,23 @@ rbimpl_str_ensure_terminator(VALUE str)
 
     if (zero_filled(ptr + len, termlen)) return ptr;
 
-    if (!ruby_thread_has_gvl_p()) {
-        /* Allocate a null-terminated copy outside the GC heap and
-         * cache it in ephemeral_term_table, keyed by this string's VALUE.
-         * The copy is freed when the string is freed (rb_str_free). */
+    if (ruby_thread_has_gvl_p()) {
+        char *result;
+        if (st_lookup(gvl_term_table, (st_data_t)str, (st_data_t *)&result))
+            return result;
+        result = ruby_mimmalloc((size_t)len + (size_t)termlen);
+        if (!result) {
+            fprintf(stderr, "[FATAL] failed to allocate memory\n");
+            exit(EXIT_FAILURE);
+        }
+        memcpy(result, ptr, (size_t)len);
+        memset(result + len, 0, (size_t)termlen);
+        st_insert(gvl_term_table, (st_data_t)str, (st_data_t)result);
+        gvl_term_count++;
+        return result;
+    }
+    else {
+        RUBY_ATOMIC_INC(ephemeral_term_nogvl_total);
         char *result;
         rb_nativethread_lock_lock(&ephemeral_term_lock);
         if (st_lookup(ephemeral_term_table, (st_data_t)str, (st_data_t *)&result)) {
@@ -3048,9 +3077,6 @@ rbimpl_str_ensure_terminator(VALUE str)
         rb_nativethread_lock_unlock(&ephemeral_term_lock);
         return result;
     }
-
-    str_make_independent_expand(str, len, 0L, termlen);
-    return RSTRING_RAW_PTR(str);
 }
 
 VALUE
@@ -6350,7 +6376,7 @@ rb_str_sub_bang(int argc, VALUE *argv, VALUE str)
         }
 
         if (iter || !NIL_P(hash)) {
-            p = RSTRING_PTR(str); len = RSTRING_LEN(str);
+            p = RSTRING_RAW_PTR(str); len = RSTRING_LEN(str);
 
             if (iter) {
                 repl = rb_obj_as_string(rb_yield(match0));
@@ -9599,9 +9625,9 @@ rb_str_enumerate_lines(int argc, VALUE *argv, VALUE str, VALUE ary)
 
     if (!RSTRING_LEN(str)) goto end;
     str = rb_str_new_frozen(str);
-    const char *const ptr = subptr = RSTRING_PTR(str);
+    const char *const ptr = subptr = RSTRING_RAW_PTR(str);
     const long len = RSTRING_LEN(str);
-    pend = RSTRING_END(str);
+    pend = ptr + len;
     StringValue(rs);
     rslen = RSTRING_LEN(rs);
 
@@ -10847,7 +10873,7 @@ rb_str_scan(VALUE str, VALUE pat)
     VALUE result;
     long start = 0;
     long last = -1, prev = 0;
-    const char *p = RSTRING_PTR(str);
+    const char *p = RSTRING_RAW_PTR(str);
     long len = RSTRING_LEN(str);
 
     pat = get_pat_quoted(pat, 1);
@@ -11186,7 +11212,7 @@ rb_str_sum(int argc, VALUE *argv, VALUE str)
     if (rb_check_arity(argc, 0, 1) && (bits = NUM2INT(argv[0])) < 0) {
         bits = 0;
     }
-    ptr = p = RSTRING_PTR(str);
+    ptr = p = RSTRING_RAW_PTR(str);
     len = RSTRING_LEN(str);
     pend = p + len;
 
@@ -11946,8 +11972,8 @@ enc_str_scrub(rb_encoding *enc, VALUE str, VALUE repl, int cr)
     } while (0)
 
     slen = RSTRING_LEN(str);
-    p = RSTRING_PTR(str);
-    e = RSTRING_END(str);
+    p = RSTRING_RAW_PTR(str);
+    e = p + slen;
     p1 = p;
     sp = p;
 
@@ -12963,6 +12989,7 @@ fstring_set_class_i(VALUE *str, void *data)
 void
 Init_String(void)
 {
+    gvl_term_table = st_init_numtable();
     rb_nativethread_lock_initialize(&ephemeral_term_lock);
     ephemeral_term_table = st_init_numtable();
 
