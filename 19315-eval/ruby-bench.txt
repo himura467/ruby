@@ -1,0 +1,92 @@
+current: ruby 4.1.0dev (2026-06-26T13:55:00Z 19315-eval 335f086ba4) +PRISM [arm64-darwin25]
+master: ruby 4.1.0dev (2026-06-21T03:05:27Z master a2b9d6ff3b) +PRISM [arm64-darwin25]
+
+---------------------  -------------  -------------  --------------  --------------
+bench                   current (ms)    master (ms)  master 1st itr  current/master
+activerecord            156.5 ± 2.2%   157.9 ± 3.4%           1.000           0.991
+chunky-png              486.7 ± 0.4%   495.0 ± 0.3%           0.979           0.983
+erubi-rails             699.8 ± 0.8%   708.1 ± 1.7%           0.985           0.988
+hexapdf                1255.0 ± 0.2%  1246.2 ± 0.7%           1.010           1.007
+liquid-c                 31.6 ± 4.2%    31.4 ± 4.6%           1.084           1.005
+liquid-compile           29.8 ± 4.9%    30.0 ± 4.9%           1.001           0.992
+liquid-render            79.9 ± 2.2%    79.9 ± 1.8%           0.999           1.000
+lobsters                478.3 ± 0.9%   479.5 ± 2.0%           0.999           0.998
+mail                     70.4 ± 2.6%    71.5 ± 2.4%           0.978           0.984
+psych-load             1280.7 ± 0.8%  1244.0 ± 0.2%           0.997           1.029
+railsbench              940.9 ± 1.2%   940.7 ± 1.2%           0.928           1.000
+rubocop                 104.2 ± 5.5%   105.0 ± 7.6%           1.018           0.992
+ruby-lsp                 94.8 ± 3.3%    99.0 ± 2.8%           0.958           0.958
+sequel                   32.2 ± 4.7%    31.4 ± 4.5%           1.014           1.027
+shipit                  842.0 ± 1.5%   835.4 ± 0.9%           0.980           1.008
+addressable-equality    348.6 ± 1.2%   356.8 ± 0.5%           0.988           0.977
+addressable-getters      87.6 ± 1.9%    87.9 ± 0.2%           0.990           0.996
+addressable-join        168.2 ± 1.5%   166.0 ± 1.0%           0.987           1.013
+addressable-merge        91.0 ± 0.3%    92.1 ± 1.1%           1.040           0.988
+addressable-new          42.1 ± 0.6%    42.3 ± 0.2%           0.938           0.996
+addressable-normalize   200.5 ± 0.5%   201.0 ± 0.8%           0.998           0.997
+addressable-parse       135.9 ± 0.1%   136.3 ± 0.2%           0.988           0.997
+addressable-setters      77.9 ± 1.4%    78.5 ± 2.4%           0.990           0.993
+addressable-to-s         88.0 ± 0.8%    88.3 ± 1.0%           1.061           0.997
+binarytrees             228.2 ± 0.9%   231.7 ± 1.0%           1.004           0.985
+blurhash                249.7 ± 0.3%   250.9 ± 0.4%           1.001           0.995
+erubi                   124.4 ± 1.3%   122.9 ± 0.1%           1.008           1.013
+etanni                  213.1 ± 1.2%   210.4 ± 0.5%           1.022           1.013
+fannkuchredux           352.1 ± 1.4%   358.3 ± 0.4%           0.950           0.982
+fluentd                 237.3 ± 1.9%   262.2 ± 1.9%           0.932           0.905
+gcbench                1295.4 ± 0.1%  1298.7 ± 0.2%           0.995           0.998
+graphql                  40.5 ± 2.7%    40.2 ± 2.6%           1.032           1.007
+graphql-native          176.6 ± 2.0%   176.0 ± 1.8%           1.011           1.004
+knucleotide              25.7 ± 4.3%    25.8 ± 4.2%           1.005           0.997
+lee                     530.6 ± 0.3%   529.1 ± 0.4%           0.995           1.003
+matmul                  358.4 ± 0.5%   358.4 ± 0.4%           1.000           1.000
+nbody                    64.0 ± 0.1%    63.9 ± 0.1%           1.000           1.001
+nqueens                 162.7 ± 0.7%   162.5 ± 0.1%           0.978           1.002
+optcarrot              3436.1 ± 0.4%  3433.4 ± 0.4%           1.000           1.001
+protoboeuf              104.4 ± 0.1%   103.0 ± 0.7%           1.014           1.014
+protoboeuf-encode       100.5 ± 1.0%    99.4 ± 0.1%           1.007           1.012
+rack                     32.9 ± 5.4%    32.6 ± 4.4%           1.010           1.008
+ruby-json               154.2 ± 0.5%   153.0 ± 0.6%           1.027           1.008
+rubyboy                3134.7 ± 0.2%  3111.3 ± 0.1%           1.010           1.008
+rubykon                 570.5 ± 1.7%   571.2 ± 2.1%           1.014           0.999
+splay                   93.6 ± 33.9%   93.8 ± 33.8%           0.987           0.998
+sudoku                  398.8 ± 0.3%   399.0 ± 0.3%           0.999           1.000
+tinygql                 386.6 ± 0.6%   385.1 ± 0.4%           1.019           1.004
+30k_ifelse              333.7 ± 1.0%   335.6 ± 1.6%           0.979           0.995
+30k_methods             280.0 ± 0.9%   279.7 ± 0.8%           1.015           1.001
+attr_accessor           126.6 ± 0.3%   128.1 ± 0.9%           0.992           0.988
+cfunc_itself             60.9 ± 0.1%    60.4 ± 0.1%           1.008           1.007
+fib                     161.4 ± 0.3%   162.3 ± 0.6%           0.996           0.995
+getivar                  90.6 ± 1.0%    90.7 ± 0.2%           0.994           0.999
+getivar-module          181.3 ± 0.3%   182.2 ± 0.5%           1.001           0.995
+keyword_args            137.7 ± 1.1%   137.5 ± 0.1%           0.995           1.001
+loops-times             710.1 ± 0.2%   709.7 ± 0.2%           1.000           1.000
+object-new               36.2 ± 0.6%    36.3 ± 0.4%           0.993           0.996
+object-new-initialize    72.0 ± 0.1%    72.1 ± 1.3%           1.004           0.999
+object-new-no-escape    141.9 ± 0.5%   140.5 ± 0.1%           1.007           1.010
+respond_to              149.7 ± 0.5%   150.4 ± 0.1%           0.994           0.995
+ruby-xor                 84.9 ± 0.6%    85.1 ± 0.4%           1.001           0.997
+send_bmethod            146.7 ± 0.6%   146.9 ± 0.4%           0.997           0.999
+send_cfunc_block        192.9 ± 0.4%   194.0 ± 0.9%           0.995           0.994
+send_rubyfunc_block      98.8 ± 1.0%    98.6 ± 0.1%           0.993           1.002
+setivar                  61.2 ± 1.8%    60.8 ± 0.3%           1.006           1.007
+setivar_object           70.2 ± 0.8%    69.6 ± 1.1%           1.002           1.009
+setivar_young            70.0 ± 1.0%    70.0 ± 1.1%           0.992           1.000
+str_concat               54.9 ± 1.1%    54.8 ± 2.4%           1.002           1.002
+structaref              131.6 ± 1.4%   131.9 ± 0.6%           1.013           0.998
+structaset              119.0 ± 0.7%   119.8 ± 1.1%           0.992           0.993
+throw                    13.9 ± 1.2%    13.8 ± 1.4%           1.004           1.004
+---------------------  -------------  -------------  --------------  --------------
+
+GC summary:
+-------  ---------------  ----------------  -------------  --------------  -------------  -------------  -------------
+bench    mark/iter ratio  sweep/iter ratio  mark/GC ratio  sweep/GC ratio     major/iter     minor/iter     minor GC %
+gcbench            0.978             0.998          0.978           0.998   0.0  →   0.0  52.0  →  52.0  100%  →  100%
+-------  ---------------  ----------------  -------------  --------------  -------------  -------------  -------------
+
+Legend:
+- master 1st itr: ratio of current/master time for the first benchmarking iteration.
+- current/master: ratio of current/master time. Higher is better for master. Above 1 represents a speedup.
+- GC summary compares current → comparison. Ratio columns are current/comparison; above 1 means the comparison spent less GC time.
+- mark/iter ratio and sweep/iter ratio compare total GC phase time per benchmark iteration, so they include both per-GC cost and GC frequency changes.
+- mark/GC ratio and sweep/GC ratio compare average phase time per GC, isolating whether each GC became cheaper or more expensive.
+- major/iter, minor/iter, and minor GC % show current → comparison values, not ratios. Rows with no GC activity are omitted.
