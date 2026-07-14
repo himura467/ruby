@@ -421,6 +421,62 @@ class TestIOBuffer < Test::Unit::TestCase
     assert_equal "Ciao! World", hello
   end
 
+  def test_free_invalidates_buffer
+    buffer = IO::Buffer.new(16)
+    buffer.free
+
+    assert_predicate buffer, :null?
+    refute_predicate buffer, :valid?
+
+    assert_raise(IO::Buffer::InvalidatedError) {buffer.get_string}
+    assert_raise(IO::Buffer::InvalidatedError) {buffer.get_value(:U8, 0)}
+    assert_raise(IO::Buffer::InvalidatedError) {buffer.set_string("!")}
+    assert_raise(IO::Buffer::InvalidatedError) {buffer.dup}
+  end
+
+  def test_free_invalidates_string_buffer
+    buffer = IO::Buffer.for("Hello World".freeze)
+    buffer.free
+
+    refute_predicate buffer, :valid?
+    assert_raise(IO::Buffer::InvalidatedError) {buffer.get_string}
+  end
+
+  def test_free_twice_stays_invalid
+    buffer = IO::Buffer.new(16)
+    buffer.free
+    buffer.free
+
+    refute_predicate buffer, :valid?
+    assert_raise(IO::Buffer::InvalidatedError) {buffer.get_string}
+  end
+
+  def test_freed_buffer_can_be_resized
+    buffer = IO::Buffer.new(16)
+    buffer.free
+
+    buffer.resize(8)
+    assert_predicate buffer, :valid?
+    assert_equal 8, buffer.size
+    assert_equal "\0" * 8, buffer.get_string
+  end
+
+  def test_free_zero_length_buffer_remains_valid
+    buffer = IO::Buffer.new(0)
+    buffer.free
+
+    assert_predicate buffer, :valid?
+    assert_equal "", buffer.get_string
+  end
+
+  def test_resize_to_zero_remains_valid
+    buffer = IO::Buffer.new(16)
+    buffer.resize(0)
+
+    assert_predicate buffer, :valid?
+    assert_equal "", buffer.get_string
+  end
+
   def test_locked
     buffer = IO::Buffer.new(128, IO::Buffer::INTERNAL|IO::Buffer::LOCKED)
 

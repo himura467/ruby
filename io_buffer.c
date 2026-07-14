@@ -229,6 +229,10 @@ io_buffer_initialize(VALUE self, struct rb_io_buffer *buffer, void *base, size_t
 #endif
 }
 
+// The buffer's memory was freed and not re-allocated yet. Internal only;
+// bit 16 is unused by the public flags in ruby/io/buffer.h.
+enum { RB_IO_BUFFER_FREED = 16 };
+
 static void
 io_buffer_free(struct rb_io_buffer *buffer)
 {
@@ -259,7 +263,7 @@ io_buffer_free(struct rb_io_buffer *buffer)
         buffer->base = NULL;
 
         buffer->size = 0;
-        buffer->flags = 0;
+        buffer->flags = RB_IO_BUFFER_FREED;
         buffer->source = Qnil;
     }
 
@@ -989,6 +993,10 @@ io_buffer_validate_slice(VALUE source, void *base, size_t size)
 static int
 io_buffer_validate(struct rb_io_buffer *buffer)
 {
+    if (buffer->flags & RB_IO_BUFFER_FREED) {
+        return 0;
+    }
+
     if (buffer->source != Qnil) {
         // Only slices incur this overhead, unfortunately... better safe than sorry!
         return io_buffer_validate_slice(buffer->source, buffer->base, buffer->size);
@@ -1282,7 +1290,9 @@ rb_io_buffer_size(VALUE self)
  *  Returns whether the buffer buffer is accessible.
  *
  *  A buffer becomes invalid if it is a slice of another buffer (or string)
- *  which has been freed or re-allocated at a different address.
+ *  which has been freed or re-allocated at a different address, or if its
+ *  own memory was released by #free. Accessing an invalid buffer raises
+ *  IO::Buffer::InvalidatedError.
  */
 static VALUE
 rb_io_buffer_valid_p(VALUE self)
@@ -1622,19 +1632,20 @@ rb_io_buffer_locked(VALUE self)
  *  * for a buffer created from scratch: free memory.
  *  * for a buffer created from string: undo the association.
  *
- *  After the buffer is freed, no further operations can be performed on it.
+ *  After the buffer is freed, no further operations can be performed on it:
+ *  it becomes invalid, and accessing it raises IO::Buffer::InvalidatedError.
  *
  *  You can resize a freed buffer to re-allocate it.
  *
  *    buffer = IO::Buffer.for('test')
  *    buffer.free
- *    # => #<IO::Buffer 0x0000000000000000+0 NULL>
+ *    # => #<IO::Buffer 0x0000000000000000+0 NULL INVALID>
  *
  *    buffer.get_value(:U8, 0)
- *    # in `get_value': The buffer is not allocated! (IO::Buffer::AllocationError)
+ *    # in `get_value': Buffer has been invalidated! (IO::Buffer::InvalidatedError)
  *
  *    buffer.get_string
- *    # in `get_string': The buffer is not allocated! (IO::Buffer::AllocationError)
+ *    # in `get_string': Buffer has been invalidated! (IO::Buffer::InvalidatedError)
  *
  *    buffer.null?
  *    # => true
@@ -1878,6 +1889,9 @@ rb_io_buffer_resize(VALUE self, size_t size)
 {
     struct rb_io_buffer *buffer = get_io_buffer(self);
 
+    // Resizing a freed buffer re-allocates it (see #free):
+    buffer->flags &= ~RB_IO_BUFFER_FREED;
+
     io_buffer_validate_for_reading(buffer);
 
     if (buffer->flags & RB_IO_BUFFER_LOCKED) {
@@ -1913,6 +1927,8 @@ rb_io_buffer_resize(VALUE self, size_t size)
     if (buffer->flags & RB_IO_BUFFER_INTERNAL) {
         if (size == 0) {
             io_buffer_free(buffer);
+            // Resizing to zero makes an empty buffer, not a freed one:
+            buffer->flags &= ~RB_IO_BUFFER_FREED;
             return;
         }
 
@@ -4046,7 +4062,7 @@ Init_IO_Buffer(void)
     /* Raised when you try to write to a read-only buffer, or resize an external buffer. */
     rb_eIOBufferAccessError = rb_define_class_under(rb_cIOBuffer, "AccessError", rb_eRuntimeError);
 
-    /* Raised if you try to access a buffer slice which no longer references a valid memory range of the underlying source. */
+    /* Raised if you try to access a buffer which is no longer valid: a slice which no longer references a valid memory range of the underlying source, or a buffer whose memory was released by #free. */
     rb_eIOBufferInvalidatedError = rb_define_class_under(rb_cIOBuffer, "InvalidatedError", rb_eRuntimeError);
 
     /* Raised if the mask given to a binary operation is invalid, e.g. zero length or overlaps the target buffer. */

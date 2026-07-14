@@ -6,7 +6,6 @@ describe "IO::Buffer#valid?" do
     @buffer = nil
   end
 
-  # Non-slices are always valid
   context "with a non-slice buffer" do
     it "is true for a regular buffer" do
       @buffer = IO::Buffer.new(4)
@@ -18,26 +17,52 @@ describe "IO::Buffer#valid?" do
       @buffer.valid?.should == true
     end
 
-    it "is true for a freed buffer" do
-      @buffer = IO::Buffer.new(4)
-      @buffer.free
-      @buffer.valid?.should == true
+    ruby_version_is "4.1" do
+      it "is false for a freed buffer" do
+        @buffer = IO::Buffer.new(4)
+        @buffer.free
+        @buffer.valid?.should == false
+      end
+
+      it "is false for a freed file-backed buffer" do
+        File.open(__FILE__, "r") do |file|
+          @buffer = IO::Buffer.map(file, nil, 0, IO::Buffer::READONLY)
+          @buffer.valid?.should == true
+          @buffer.free
+          @buffer.valid?.should == false
+        end
+      end
+
+      it "is false for a freed string-backed buffer" do
+        @buffer = IO::Buffer.for("hello")
+        @buffer.valid?.should == true
+        @buffer.free
+        @buffer.valid?.should == false
+      end
     end
 
-    it "is true for a freed file-backed buffer" do
-      File.open(__FILE__, "r") do |file|
-        @buffer = IO::Buffer.map(file, nil, 0, IO::Buffer::READONLY)
+    ruby_version_is ""..."4.1" do
+      it "is true for a freed buffer" do
+        @buffer = IO::Buffer.new(4)
+        @buffer.free
+        @buffer.valid?.should == true
+      end
+
+      it "is true for a freed file-backed buffer" do
+        File.open(__FILE__, "r") do |file|
+          @buffer = IO::Buffer.map(file, nil, 0, IO::Buffer::READONLY)
+          @buffer.valid?.should == true
+          @buffer.free
+          @buffer.valid?.should == true
+        end
+      end
+
+      it "is true for a freed string-backed buffer" do
+        @buffer = IO::Buffer.for("hello")
         @buffer.valid?.should == true
         @buffer.free
         @buffer.valid?.should == true
       end
-    end
-
-    it "is true for a freed string-backed buffer" do
-      @buffer = IO::Buffer.for("hello")
-      @buffer.valid?.should == true
-      @buffer.free
-      @buffer.valid?.should == true
     end
   end
 
