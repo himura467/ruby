@@ -3638,7 +3638,7 @@ CODE
   def test_embedded_middle_string_terminator
     require 'objspace'
     hundred = "0123456789" * 10
-    str = "#{hundred}\0#{hundred}".freeze
+    str = "#{hundred}\0#{hundred}"
     substr = str.byteslice(0, hundred.bytesize)
     assert_equal hundred, substr
     assert_includes ObjectSpace.dump(substr), ' "embedded":true,'
