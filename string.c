@@ -3281,7 +3281,7 @@ str_subseq(VALUE str, long beg, long len)
 
     const int termlen = TERM_LEN(str);
     if (!SHARABLE_SUBSTRING_P(str, beg, len)) {
-        str2 = rb_enc_str_new(RSTRING_PTR(str) + beg, len, rb_str_enc_get(str));
+        str2 = rb_enc_str_new(RSTRING_RAW_PTR(str) + beg, len, rb_str_enc_get(str));
         if (ENC_CODERANGE(str) == ENC_CODERANGE_7BIT) {
             ENC_CODERANGE_SET(str2, ENC_CODERANGE_7BIT);
         }
@@ -3300,7 +3300,7 @@ str_subseq(VALUE str, long beg, long len)
     if (embed_size <= max_embed_size && rb_gc_size_allocatable_p(embed_size)) {
         str2 = str_alloc_embed(rb_cString, len + termlen);
         char *ptr2 = RSTRING(str2)->as.embed.ary;
-        memcpy(ptr2, RSTRING_PTR(str) + beg, len);
+        memcpy(ptr2, RSTRING_RAW_PTR(str) + beg, len);
         TERM_FILL(ptr2 + len, termlen);
 
         STR_SET_LEN(str2, len);
