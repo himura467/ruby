@@ -1685,7 +1685,7 @@ str_new_frozen_buffer(VALUE klass, VALUE orig, int copy_encoding)
     int termlen = copy_encoding ? TERM_LEN(orig) : 1;
 
     if (STR_EMBED_P(orig) || STR_EMBEDDABLE_P(len, termlen)) {
-        str = str_enc_new(klass, RSTRING_PTR(orig), len, enc);
+        str = str_enc_new(klass, RSTRING_RAW_PTR(orig), len, enc);
         RUBY_ASSERT(STR_EMBED_P(str));
     }
     else {
@@ -1715,14 +1715,14 @@ str_new_frozen_buffer(VALUE klass, VALUE orig, int copy_encoding)
         else if (STR_EMBEDDABLE_P(RSTRING_LEN(orig), TERM_LEN(orig))) {
             str = str_alloc_embed(klass, RSTRING_LEN(orig) + TERM_LEN(orig));
             STR_SET_EMBED(str);
-            memcpy(RSTRING_PTR(str), RSTRING_PTR(orig), RSTRING_LEN(orig));
+            memcpy(RSTRING_PTR(str), RSTRING_RAW_PTR(orig), RSTRING_LEN(orig));
             STR_SET_LEN(str, RSTRING_LEN(orig));
             ENC_CODERANGE_SET(str, ENC_CODERANGE(orig));
             TERM_FILL(RSTRING_END(str), TERM_LEN(orig));
         }
         else {
             if (RB_OBJ_SHAREABLE_P(orig)) {
-                str = str_new(klass, RSTRING_PTR(orig), RSTRING_LEN(orig));
+                str = str_new(klass, RSTRING_RAW_PTR(orig), RSTRING_LEN(orig));
             }
             else {
                 str = heap_str_make_shared(klass, orig);
